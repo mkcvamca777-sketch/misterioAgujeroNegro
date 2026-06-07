@@ -118,6 +118,24 @@ export class GameScene extends Phaser.Scene {
       color: '#a092ff'
     });
 
+    // Exit to Menu button
+    const exitBtn = this.add.text(width - 20, 20, '✖ SALIR', {
+      font: 'bold 16px "Outfit", "Inter", sans-serif',
+      color: '#ff5555',
+      backgroundColor: '#220000',
+      padding: { x: 10, y: 5 }
+    }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
+
+    exitBtn.on('pointerover', () => exitBtn.setColor('#ffffff'));
+    exitBtn.on('pointerout', () => exitBtn.setColor('#ff5555'));
+    exitBtn.on('pointerdown', () => {
+      AudioService.playSFX('click');
+      this.cameras.main.fadeOut(400, 10, 5, 27);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start('MainMenuScene');
+      });
+    });
+
     // Player Probe Physics Image
     // Let's draw a simple triangular probe using Phaser graphics to load as a texture
     const probeGraphics = this.make.graphics();
@@ -449,7 +467,7 @@ export class GameScene extends Phaser.Scene {
     btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 100, 240, 48, 8);
     this.dialogPanel.add(btnMenu);
 
-    const btnText = this.add.text(width / 2, height / 2 + 124, 'VOLVER AL MENÚ', {
+    const btnText = this.add.text(width / 2, height / 2 + 124, 'SIGUIENTE NIVEL', {
       font: 'bold 16px "Outfit", sans-serif',
       color: '#130d2d'
     }).setOrigin(0.5);
@@ -463,7 +481,7 @@ export class GameScene extends Phaser.Scene {
       this.dialogPanel.setVisible(false);
       this.cameras.main.fadeOut(400, 10, 5, 27);
       this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start('MainMenuScene');
+        this.scene.start('Level2Scene');
       });
     });
 

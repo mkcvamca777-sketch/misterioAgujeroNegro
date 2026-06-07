@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { AudioService } from '../audio/AudioService';
+import { StorageService } from '../utils/StorageService';
 
 export class ConfigScene extends Phaser.Scene {
   constructor() {
@@ -24,11 +25,11 @@ export class ConfigScene extends Phaser.Scene {
     const panel = this.add.graphics();
     panel.fillStyle(0x1a1235, 0.95);
     panel.lineStyle(4, 0x673ab7, 1);
-    panel.fillRoundedRect(width / 2 - 250, height / 2 - 220, 500, 440, 16);
-    panel.strokeRoundedRect(width / 2 - 250, height / 2 - 220, 500, 440, 16);
+    panel.fillRoundedRect(width / 2 - 250, height / 2 - 240, 500, 500, 16);
+    panel.strokeRoundedRect(width / 2 - 250, height / 2 - 240, 500, 500, 16);
 
     // Title
-    this.add.text(width / 2, height / 2 - 170, 'CONFIGURACIÓN', {
+    this.add.text(width / 2, height / 2 - 190, 'CONFIGURACIÓN', {
       font: 'bold 36px "Outfit", "Inter", sans-serif',
       color: '#ffc107'
     }).setOrigin(0.5);
@@ -145,24 +146,48 @@ export class ConfigScene extends Phaser.Scene {
       AudioService.playSFX('click');
     });
 
+    // RESET PROGRESS BUTTON
+    const btnReset = this.add.graphics();
+    btnReset.fillStyle(0xd32f2f, 1); // Red color for danger
+    btnReset.fillRoundedRect(width / 2 - 120, height / 2 + 130, 240, 40, 8);
+
+    const btnResetText = this.add.text(width / 2, height / 2 + 150, 'REINICIAR PROGRESO', {
+      font: 'bold 16px "Outfit", "Inter", sans-serif',
+      color: '#ffffff'
+    }).setOrigin(0.5);
+
+    const resetZone = this.add.zone(width / 2, height / 2 + 150, 240, 40).setInteractive({ useHandCursor: true });
+    
+    resetZone.on('pointerdown', () => {
+      AudioService.playSFX('incorrect'); // Use incorrect sound to denote destructive action
+      StorageService.resetProgress();
+      // Visual feedback
+      btnResetText.setText('¡PROGRESO BORRADO!');
+      btnResetText.setColor('#00ff00');
+      this.time.delayedCall(1500, () => {
+        btnResetText.setText('REINICIAR PROGRESO');
+        btnResetText.setColor('#ffffff');
+      });
+    });
+
     // BACK TO MAIN MENU BUTTON
     const btnBack = this.add.graphics();
     btnBack.fillStyle(0xff5722, 1);
-    btnBack.fillRoundedRect(width / 2 - 100, height / 2 + 140, 200, 50, 10);
+    btnBack.fillRoundedRect(width / 2 - 100, height / 2 + 190, 200, 50, 10);
 
-    const btnBackText = this.add.text(width / 2, height / 2 + 165, 'VOLVER', {
+    const btnBackText = this.add.text(width / 2, height / 2 + 215, 'VOLVER', {
       font: 'bold 20px "Outfit", "Inter", sans-serif',
       color: '#ffffff'
     }).setOrigin(0.5);
 
-    const backZone = this.add.zone(width / 2, height / 2 + 165, 200, 50).setInteractive({ useHandCursor: true });
+    const backZone = this.add.zone(width / 2, height / 2 + 215, 200, 50).setInteractive({ useHandCursor: true });
     
     backZone.on('pointerover', () => {
       this.tweens.add({
         targets: [btnBack, btnBackText],
         scale: 1.05,
         x: (targets: any) => targets === btnBack ? width / 2 - 105 : width / 2,
-        y: (targets: any) => targets === btnBack ? height / 2 + 137.5 : height / 2 + 165,
+        y: (targets: any) => targets === btnBack ? height / 2 + 187.5 : height / 2 + 215,
         duration: 100
       });
     });
@@ -171,7 +196,7 @@ export class ConfigScene extends Phaser.Scene {
       btnBack.setScale(1);
       btnBack.setPosition(0, 0);
       btnBackText.setScale(1);
-      btnBackText.setPosition(width / 2, height / 2 + 165);
+      btnBackText.setPosition(width / 2, height / 2 + 215);
     });
 
     backZone.on('pointerdown', () => {

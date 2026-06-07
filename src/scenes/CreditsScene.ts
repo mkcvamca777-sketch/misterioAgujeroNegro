@@ -24,18 +24,18 @@ export class CreditsScene extends Phaser.Scene {
     const panel = this.add.graphics();
     panel.fillStyle(0x110b27, 0.95);
     panel.lineStyle(4, 0x673ab7, 1);
-    panel.fillRoundedRect(width / 2 - 250, height / 2 - 200, 500, 400, 16);
-    panel.strokeRoundedRect(width / 2 - 250, height / 2 - 200, 500, 400, 16);
+    panel.fillRoundedRect(width / 2 - 250, height / 2 - 225, 500, 450, 16);
+    panel.strokeRoundedRect(width / 2 - 250, height / 2 - 225, 500, 450, 16);
 
     // Title
-    this.add.text(width / 2, height / 2 - 150, 'CRÉDITOS', {
+    this.add.text(width / 2, height / 2 - 170, 'CRÉDITOS', {
       font: 'bold 36px "Outfit", "Inter", sans-serif',
       color: '#e040fb'
     }).setOrigin(0.5);
 
     // Development info
-    this.add.text(width / 2, height / 2 + 10, 
-      'Diseño & Programación:\nAntigravity AI\n\nIlustraciones & Arte:\nProfesor Pibble Studio\n\nMotor de Juego:\nPhaser 3\n\nAudio Engine:\nHowler.js\n\n¡Gracias por jugar y aprender!', 
+    this.add.text(width / 2, height / 2, 
+      'Desarrollo y Programación:\nValentina Micaela Céspedes Álvarez\n& Antigravity AI\n\nDiseño y Arte:\nChatGPT\n\nTecnologías:\nPhaser 3 & Howler.js\n\n¡Gracias por jugar y aprender!', 
       {
         font: '20px "Outfit", "Inter", sans-serif',
         color: '#ffffff',
@@ -47,14 +47,14 @@ export class CreditsScene extends Phaser.Scene {
     // Back button
     const btnBack = this.add.graphics();
     btnBack.fillStyle(0xff5722, 1);
-    btnBack.fillRoundedRect(width / 2 - 100, height / 2 + 120, 200, 40, 8);
+    btnBack.fillRoundedRect(width / 2 - 100, height / 2 + 150, 200, 40, 8);
 
-    this.add.text(width / 2, height / 2 + 140, 'MENÚ PRINCIPAL', {
+    this.add.text(width / 2, height / 2 + 170, 'MENÚ PRINCIPAL', {
       font: 'bold 16px "Outfit", "Inter", sans-serif',
       color: '#ffffff'
     }).setOrigin(0.5);
 
-    const backZone = this.add.zone(width / 2, height / 2 + 140, 200, 40).setInteractive({ useHandCursor: true });
+    const backZone = this.add.zone(width / 2, height / 2 + 170, 200, 40).setInteractive({ useHandCursor: true });
     backZone.on('pointerdown', () => {
       AudioService.playSFX('click');
       this.cameras.main.fadeOut(400, 10, 5, 27);
