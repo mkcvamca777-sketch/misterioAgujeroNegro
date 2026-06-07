@@ -1,0 +1,44 @@
+import Phaser from 'phaser';
+import './style.css';
+import { BootScene } from './scenes/BootScene';
+import { PreloadScene } from './scenes/PreloadScene';
+import { MainMenuScene } from './scenes/MainMenuScene';
+import { GameScene } from './scenes/GameScene';
+import { EncyclopediaScene } from './scenes/EncyclopediaScene';
+import { BadgesScene } from './scenes/BadgesScene';
+import { ConfigScene } from './scenes/ConfigScene';
+import { CreditsScene } from './scenes/CreditsScene';
+
+const config: Phaser.Types.Core.GameConfig = {
+  type: Phaser.AUTO,
+  width: 1024,
+  height: 576,
+  parent: 'game-container',
+  backgroundColor: '#0a051b',
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { x: 0, y: 0 },
+      debug: false
+    }
+  },
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  scene: [
+    BootScene,
+    PreloadScene,
+    MainMenuScene,
+    GameScene,
+    EncyclopediaScene,
+    BadgesScene,
+    ConfigScene,
+    CreditsScene
+  ]
+};
+
+// Start the game when the window loads
+window.addEventListener('load', () => {
+  new Phaser.Game(config);
+});
