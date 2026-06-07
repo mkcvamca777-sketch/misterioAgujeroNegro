@@ -5,6 +5,7 @@ import { PreloadScene } from './scenes/PreloadScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { GameScene } from './scenes/GameScene';
 import { Level2Scene } from './scenes/Level2Scene';
+import { Level3Scene } from './scenes/Level3Scene';
 import { EncyclopediaScene } from './scenes/EncyclopediaScene';
 import { BadgesScene } from './scenes/BadgesScene';
 import { ConfigScene } from './scenes/ConfigScene';
@@ -33,6 +34,7 @@ const config: Phaser.Types.Core.GameConfig = {
     MainMenuScene,
     GameScene,
     Level2Scene,
+    Level3Scene,
     EncyclopediaScene,
     BadgesScene,
     ConfigScene,

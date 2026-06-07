@@ -181,7 +181,7 @@ export class MainMenuScene extends Phaser.Scene {
   private createCroppedButtons(): void {
     // Define crop boxes inside the high-res button images (to crop the transparent margins)
     const btnData = [
-      { key: 'btn_comenzar', scene: 'Level2Scene', crop: { x: 152, y: 232, w: 728, h: 188 } },
+      { key: 'btn_comenzar', scene: 'Level3Scene', crop: { x: 152, y: 232, w: 728, h: 188 } },
       { key: 'btn_enciclopedia', scene: 'EncyclopediaScene', crop: { x: 120, y: 244, w: 784, h: 192 } },
       { key: 'btn_insignias', scene: 'BadgesScene', crop: { x: 120, y: 244, w: 784, h: 192 } },
       { key: 'btn_configuracion', scene: 'ConfigScene', crop: { x: 120, y: 244, w: 792, h: 192 } },
