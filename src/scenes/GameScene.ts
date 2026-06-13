@@ -21,6 +21,9 @@ export class GameScene extends Phaser.Scene {
   private score = 0;
   private scoreText!: Phaser.GameObjects.Text;
   
+  private lives = 3;
+  private livesText!: Phaser.GameObjects.Text;
+  
   private activeQuestion: Question | null = null;
   private quizActive = false;
   private dialogPanel!: Phaser.GameObjects.Container;
@@ -63,6 +66,17 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Reset properties upon scene re-entry
+    this.score = 0;
+    this.lives = 3;
+    this.quizActive = false;
+    
+    // Play deep hum for black hole
+    AudioService.playBlackHoleHum();
+    this.events.once('shutdown', () => {
+      AudioService.stopBlackHoleHum();
+    });
+    
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
 
@@ -107,9 +121,14 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Score display
-    this.scoreText = this.add.text(20, 20, 'Sondas recolectadas: 0/3', {
+    this.scoreText = this.add.text(20, 20, `Sondas recolectadas: ${this.score}/3`, {
       font: 'bold 20px "Outfit", "Inter", sans-serif',
       color: '#ffffff'
+    });
+
+    this.livesText = this.add.text(20, 50, `Vidas: ${this.lives}/3`, {
+      font: 'bold 20px "Outfit", "Inter", sans-serif',
+      color: '#ff5555'
     });
 
     // Controls description
@@ -209,10 +228,18 @@ export class GameScene extends Phaser.Scene {
     const distance = Math.sqrt(distanceSq);
 
     if (distance < 50) {
-      // Pulled into event horizon! Reset probe position
+      // Pulled into event horizon! 
       AudioService.playSFX('incorrect');
       this.cameras.main.flash(500, 255, 0, 0);
-      this.resetProbe();
+      
+      this.lives--;
+      this.livesText.setText(`Vidas: ${this.lives}/3`);
+      
+      if (this.lives <= 0) {
+        this.showGameOver();
+      } else {
+        this.resetProbe();
+      }
       return;
     }
 
@@ -300,13 +327,16 @@ export class GameScene extends Phaser.Scene {
       this.dialogPanel.list[2].destroy();
     }
 
-    // Title / Question Text
-    const qText = this.add.text(width / 2, height / 2 - 140, q.text, {
-      font: 'bold 22px "Outfit", "Inter", sans-serif',
+    const qText = this.add.text(width / 2, height / 2 - 160, q.text, {
+      fontSize: '34px',
+      fontFamily: 'Outfit, sans-serif',
+      fontStyle: 'bold',
       color: '#ffffff',
       align: 'center',
-      wordWrap: { width: 620 }
+      wordWrap: { width: 660 }
     }).setOrigin(0.5);
+    // Add subtle shadow to stand out more
+    qText.setShadow(2, 2, '#000000', 4, true, true);
     this.dialogPanel.add(qText);
 
     // Options buttons
@@ -445,15 +475,14 @@ export class GameScene extends Phaser.Scene {
     StorageService.unlockBadge('cazador'); // Hunter badge unlocked!
     AudioService.playSFX('achievement');
 
-    // Winner Banner
-    const winTitle = this.add.text(width / 2, height / 2 - 100, '¡FELICIDADES CADETE!', {
+    const winTitle = this.add.text(width / 2, height / 2 - 100, '¡NIVEL COMPLETADO!', {
       font: 'bold 36px "Outfit", sans-serif',
       color: '#ffc107',
       align: 'center'
     }).setOrigin(0.5);
     this.dialogPanel.add(winTitle);
 
-    const winDesc = this.add.text(width / 2, height / 2 - 10, 'Has recolectado todos los datos científicos de la órbita y evitado el colapso gravitacional.\n\n¡Ganaste la insignia "Cazador de Agujeros"!', {
+    const winDesc = this.add.text(width / 2, height / 2 - 10, 'Has superado el Agujero Negro y demostrado tu conocimiento.\n\n¡Obtuviste tu certificado!', {
       font: '20px "Outfit", sans-serif',
       color: '#ffffff',
       align: 'center',
@@ -461,19 +490,19 @@ export class GameScene extends Phaser.Scene {
     }).setOrigin(0.5);
     this.dialogPanel.add(winDesc);
 
-    // Menu button
+    // Next Level button
     const btnMenu = this.add.graphics();
     btnMenu.fillStyle(0x00e5ff, 1);
-    btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 100, 240, 48, 8);
+    btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 130, 240, 48, 8);
     this.dialogPanel.add(btnMenu);
 
-    const btnText = this.add.text(width / 2, height / 2 + 124, 'SIGUIENTE NIVEL', {
+    const btnText = this.add.text(width / 2, height / 2 + 154, 'SIGUIENTE NIVEL', {
       font: 'bold 16px "Outfit", sans-serif',
       color: '#130d2d'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
 
-    const menuZone = this.add.zone(width / 2, height / 2 + 124, 240, 48).setInteractive({ useHandCursor: true });
+    const menuZone = this.add.zone(width / 2, height / 2 + 154, 240, 48).setInteractive({ useHandCursor: true });
     this.dialogPanel.add(menuZone);
 
     menuZone.on('pointerdown', () => {
@@ -486,5 +515,40 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.dialogPanel.setVisible(true);
+  }
+
+  private showGameOver(): void {
+    this.quizActive = true;
+    this.probe.setVelocity(0);
+    this.probe.setAcceleration(0, 0);
+    
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+    
+    const gameOverPanel = this.add.container(0, 0);
+    gameOverPanel.setDepth(200);
+    
+    const bg = this.add.image(width / 2, height / 2, 'bg_game_over');
+    const scale = Math.max(width / bg.width, height / bg.height);
+    bg.setScale(scale);
+    gameOverPanel.add(bg);
+    
+    const btnRetry = this.add.image(width / 2 - 220, height - 100, 'btn_reintentar').setInteractive({ useHandCursor: true });
+    btnRetry.setScale(0.25);
+    gameOverPanel.add(btnRetry);
+    
+    btnRetry.on('pointerdown', () => {
+      AudioService.playSFX('click');
+      this.scene.restart();
+    });
+    
+    const btnMenu = this.add.image(width / 2 + 220, height - 100, 'btn_volver_menu').setInteractive({ useHandCursor: true });
+    btnMenu.setScale(0.25);
+    gameOverPanel.add(btnMenu);
+    
+    btnMenu.on('pointerdown', () => {
+      AudioService.playSFX('click');
+      this.scene.start('MainMenuScene');
+    });
   }
 }

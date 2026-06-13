@@ -18,7 +18,23 @@ export class EncyclopediaScene extends Phaser.Scene {
     },
     {
       title: '¿Cómo se forman?',
-      content: 'La mayoría de los agujeros negros se forman cuando una estrella gigante (mucho más grande que nuestro Sol) se queda sin combustible al final de su vida y colapsa sobre sí misma en una explosión de Supernova.'
+      content: 'La mayoría se forman cuando una estrella gigante (mucho más grande que nuestro Sol) se queda sin combustible al final de su vida y colapsa sobre sí misma en una gran explosión de Supernova.'
+    },
+    {
+      title: 'La Espaguetización',
+      content: 'Si te acercaras demasiado a un agujero negro, la gravedad tiraría más fuerte de tus pies que de tu cabeza. ¡Esto te estiraría como un fideo! Los científicos llaman a esto "Espaguetización".'
+    },
+    {
+      title: 'Tipos de Agujeros',
+      content: 'Existen de varios tamaños. Los "estelares" son pequeños pero muy densos. Los "Supermasivos" son gigantes y se encuentran en el centro de las galaxias (como el que está en el centro de la Vía Láctea).'
+    },
+    {
+      title: 'Distorsión del Tiempo',
+      content: 'Cerca de un agujero negro, la inmensa gravedad hace que el tiempo pase más despacio en comparación con alguien que está lejos. ¡Unos minutos ahí podrían ser años en la Tierra!'
+    },
+    {
+      title: 'Agujeros de Gusano',
+      content: 'Son atajos teóricos a través del espacio y el tiempo. Algunos científicos creen que ciertos agujeros negros podrían estar conectados a ellos, permitiendo viajar a galaxias lejanas instantáneamente.'
     }
   ];
 
@@ -71,15 +87,18 @@ export class EncyclopediaScene extends Phaser.Scene {
 
     // Page text containers
     this.pageTitleText = this.add.text(width / 2 - 340, height / 2 - 130, '', {
-      font: 'bold 26px "Outfit", "Inter", sans-serif',
+      fontSize: '36px',
+      fontFamily: 'Outfit, sans-serif',
+      fontStyle: 'bold',
       color: '#ffc107',
       wordWrap: { width: 680 }
     });
 
     this.pageContentText = this.add.text(width / 2 - 340, height / 2 - 70, '', {
-      font: '20px "Outfit", "Inter", sans-serif',
+      fontSize: '28px',
+      fontFamily: 'Outfit, sans-serif',
       color: '#ffffff',
-      lineSpacing: 8,
+      lineSpacing: 12,
       wordWrap: { width: 680 }
     });
 

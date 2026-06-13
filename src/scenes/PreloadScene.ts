@@ -101,6 +101,12 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('btn_insignias', 'assets/btn_insignias.png');
     this.load.image('btn_configuracion', 'assets/btn_configuracion.png');
     this.load.image('btn_creditos', 'assets/btn_creditos.png');
+    this.load.image('certificado_nivel1', 'assets/certificado_nivel1.jpg');
+    this.load.image('certificado_nivel1', 'assets/certificado_nivel1.jpg');
+    this.load.image('certificado_nivel4', 'assets/certificado_nivel4.jpg');
+    this.load.image('btn_reintentar', 'assets/btn_reintentar.png');
+    this.load.image('btn_volver_menu', 'assets/btn_volver_menu.png');
+    this.load.image('bg_game_over', 'assets/bg_game_over.png');
   }
 
   create(): void {

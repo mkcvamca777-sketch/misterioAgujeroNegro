@@ -8,6 +8,8 @@ export class AudioService {
   private static sfxVolume: number = 0.8;
   private static isMuted: boolean = false;
   private static synthCtx: AudioContext | null = null;
+  private static blackHoleOsc: OscillatorNode | null = null;
+  private static blackHoleGain: GainNode | null = null;
 
   public static initialize(): void {
     const { music, sfx } = StorageService.getVolumeSettings();
@@ -105,6 +107,57 @@ export class AudioService {
       }
     } catch (e) {
       console.error('Synthesizer sound failed', e);
+    }
+  }
+
+  public static playBlackHoleHum(): void {
+    if (this.isMuted) return;
+    try {
+      if (!this.synthCtx) {
+        this.synthCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      
+      const ctx = this.synthCtx;
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      
+      if (this.blackHoleOsc) return; // Already playing
+
+      this.blackHoleOsc = ctx.createOscillator();
+      this.blackHoleGain = ctx.createGain();
+      
+      // Deep bass hum (around 50 Hz)
+      this.blackHoleOsc.type = 'sine';
+      this.blackHoleOsc.frequency.setValueAtTime(50, ctx.currentTime);
+      
+      this.blackHoleGain.gain.setValueAtTime(0, ctx.currentTime);
+      // Fade in over 2 seconds
+      this.blackHoleGain.gain.linearRampToValueAtTime(this.sfxVolume * 0.6, ctx.currentTime + 2);
+      
+      this.blackHoleOsc.connect(this.blackHoleGain);
+      this.blackHoleGain.connect(ctx.destination);
+      
+      this.blackHoleOsc.start();
+    } catch (e) {
+      console.error('Black hole hum failed', e);
+    }
+  }
+
+  public static stopBlackHoleHum(): void {
+    if (this.blackHoleOsc && this.blackHoleGain && this.synthCtx) {
+      const ctx = this.synthCtx;
+      // Fade out over 1 second
+      this.blackHoleGain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
+      
+      try {
+        this.blackHoleOsc.stop(ctx.currentTime + 1);
+      } catch (e) {
+        // Ignore if already stopped
+      }
+      
+      this.blackHoleOsc = null;
+      this.blackHoleGain = null;
     }
   }
 

@@ -4,10 +4,10 @@ import { StorageService } from '../utils/StorageService';
 
 export class BadgesScene extends Phaser.Scene {
   private badgeList = [
-    { id: 'cadete', name: 'Cadete Espacial', desc: 'Iniciaste el viaje científico.', iconColor: 0xffaa00 },
-    { id: 'cazador', name: 'Cazador de Agujeros', desc: 'Completaste el Nivel 1 del espacio.', iconColor: 0x00e5ff },
-    { id: 'fisico', name: 'Físico Teórico', desc: 'Exploraste toda la Enciclopedia.', iconColor: 0x00e676 },
-    { id: 'maestro', name: 'Maestro Cósmico', desc: '¡Dominaste el misterio del agujero negro!', iconColor: 0xe040fb }
+    { id: 'cazador', name: 'Cazador de Agujeros', desc: 'Completaste el Nivel 1.', iconColor: 0x00e5ff },
+    { id: 'navegante', name: 'Navegante Experto', desc: 'Sobreviviste al Nivel 2.', iconColor: 0xffaa00 },
+    { id: 'astronomo', name: 'Astrónomo Mayor', desc: 'Completaste el Nivel 3.', iconColor: 0x00e676 },
+    { id: 'viajero', name: 'Viajero del Tiempo', desc: 'Superaste el Nivel 4.', iconColor: 0xe040fb }
   ];
 
   constructor() {
@@ -43,8 +43,7 @@ export class BadgesScene extends Phaser.Scene {
 
     const unlockedBadges = StorageService.getBadges();
     
-    // Auto-unlock Físico badge if they unlocked the scene, just as an easter egg for exploring
-    StorageService.unlockBadge('cadete'); // Always unlocked when they visit here first time
+    // No default unlock needed anymore
 
     // Draw badges in a 2x2 grid
     this.badgeList.forEach((badge, idx) => {
@@ -54,7 +53,7 @@ export class BadgesScene extends Phaser.Scene {
       const x = width / 2 - 200 + (col * 400);
       const y = height / 2 - 80 + (row * 170);
 
-      const isUnlocked = unlockedBadges.includes(badge.id) || badge.id === 'cadete';
+      const isUnlocked = unlockedBadges.includes(badge.id);
 
       // Draw card
       const card = this.add.graphics();
