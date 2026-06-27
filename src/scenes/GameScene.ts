@@ -28,6 +28,10 @@ export class GameScene extends Phaser.Scene {
   private quizActive = false;
   private dialogPanel!: Phaser.GameObjects.Container;
   
+  private isLeftDown = false;
+  private isRightDown = false;
+  private isUpDown = false;
+  
   private quizQuestions: Question[] = [
     {
       text: '¿Qué es el "Horizonte de Sucesos" de un agujero negro?',
@@ -212,6 +216,8 @@ export class GameScene extends Phaser.Scene {
 
     // Dialog modal container for scientific questions (hidden initially)
     this.createDialogPanel();
+    
+    this.createMobileControls();
   }
 
   update(): void {
@@ -254,22 +260,100 @@ export class GameScene extends Phaser.Scene {
       this.probe.setAcceleration(0, 0);
     }
 
-    // 2. Player Input Handling (Keyboard)
-    if (this.cursors) {
-      const speed = 200;
-      if (this.cursors.left.isDown) {
+    // 2. Player Input Handling
+    const controlType = this.registry.get('controlType') || 'keyboard';
+    const speed = 200;
+
+    if (controlType === 'pointer') {
+      this.probe.setAngularVelocity(0);
+      const pointer = this.input.activePointer;
+      if (pointer.isDown) {
+        // + Math.PI/2 because the probe graphic points UP (which is -90 degrees)
+        const targetAngle = Phaser.Math.Angle.Between(this.probe.x, this.probe.y, pointer.x, pointer.y) + Math.PI/2;
+        let diff = Phaser.Math.Angle.Wrap(targetAngle - this.probe.rotation);
+        
+        // Smooth rotational follow
+        this.probe.setAngularVelocity(diff * 300);
+
+        this.physics.velocityFromRotation(this.probe.rotation - Math.PI/2, speed, this.probe.body.velocity);
+      }
+    } else {
+      let moveLeft = this.isLeftDown;
+      let moveRight = this.isRightDown;
+      let moveUp = this.isUpDown;
+
+      if (this.cursors) {
+        if (this.cursors.left.isDown) moveLeft = true;
+        if (this.cursors.right.isDown) moveRight = true;
+        if (this.cursors.up.isDown) moveUp = true;
+      }
+
+      if (moveLeft) {
         this.probe.setAngularVelocity(-200);
-      } else if (this.cursors.right.isDown) {
+      } else if (moveRight) {
         this.probe.setAngularVelocity(200);
       } else {
         this.probe.setAngularVelocity(0);
       }
 
-      if (this.cursors.up.isDown) {
+      if (moveUp) {
         // Accelerate in the direction the probe is pointing
         this.physics.velocityFromRotation(this.probe.rotation - Math.PI/2, speed, this.probe.body.velocity);
       }
     }
+  }
+
+  private createMobileControls(): void {
+    if (this.registry.get('controlType') !== 'virtual_buttons') return;
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    // Controls container
+    const controls = this.add.container(0, 0);
+    controls.setDepth(50); // Ensure they are above stars but below dialogs
+
+    const drawButton = (x: number, y: number, color: number, text: string, callbackDown: () => void, callbackUp: () => void) => {
+      const btn = this.add.graphics();
+      btn.fillStyle(color, 0.4);
+      btn.fillCircle(x, y, 40);
+      btn.lineStyle(2, color, 0.8);
+      btn.strokeCircle(x, y, 40);
+      controls.add(btn);
+
+      const label = this.add.text(x, y, text, {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+      controls.add(label);
+
+      const zone = this.add.zone(x, y, 80, 80).setInteractive();
+      controls.add(zone);
+
+      zone.on('pointerdown', () => {
+        btn.clear();
+        btn.fillStyle(color, 0.7);
+        btn.fillCircle(x, y, 40);
+        btn.lineStyle(2, color, 1);
+        btn.strokeCircle(x, y, 40);
+        callbackDown();
+      });
+      const resetBtn = () => {
+        btn.clear();
+        btn.fillStyle(color, 0.4);
+        btn.fillCircle(x, y, 40);
+        btn.lineStyle(2, color, 0.8);
+        btn.strokeCircle(x, y, 40);
+        callbackUp();
+      };
+      zone.on('pointerup', resetBtn);
+      zone.on('pointerout', resetBtn);
+    };
+
+    drawButton(70, height - 70, 0x00e5ff, '<', () => this.isLeftDown = true, () => this.isLeftDown = false);
+    drawButton(170, height - 70, 0x00e5ff, '>', () => this.isRightDown = true, () => this.isRightDown = false);
+    drawButton(width - 70, height - 70, 0xffa500, '^', () => this.isUpDown = true, () => this.isUpDown = false);
   }
 
   private collectOrb(_probeObj: any, orbObj: any): void {

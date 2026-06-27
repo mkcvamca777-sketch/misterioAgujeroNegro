@@ -27,6 +27,11 @@ export class Level4Scene extends Phaser.Scene {
   private dialogPanel!: Phaser.GameObjects.Container;
   private currentQuestionIndex = 0;
 
+  private isLeftDown = false;
+  private isRightDown = false;
+  private isUpDown = false;
+  private isDownDown = false;
+
   private quizQuestions: Question[] = [
     {
       text: '¿Qué es teóricamente un agujero de gusano?',
@@ -153,6 +158,63 @@ export class Level4Scene extends Phaser.Scene {
     });
 
     this.createDialogPanel();
+    this.createMobileControls();
+  }
+
+  private createMobileControls(): void {
+    if (this.registry.get('controlType') !== 'virtual_buttons') return;
+
+    const width = this.cameras.main.width;
+    const height = this.cameras.main.height;
+
+    const controls = this.add.container(0, 0);
+    controls.setDepth(50);
+
+    const drawButton = (x: number, y: number, color: number, text: string, callbackDown: () => void, callbackUp: () => void) => {
+      const btn = this.add.graphics();
+      btn.fillStyle(color, 0.4);
+      btn.fillCircle(x, y, 40);
+      btn.lineStyle(2, color, 0.8);
+      btn.strokeCircle(x, y, 40);
+      controls.add(btn);
+
+      const label = this.add.text(x, y, text, {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+      controls.add(label);
+
+      const zone = this.add.zone(x, y, 80, 80).setInteractive();
+      controls.add(zone);
+
+      zone.on('pointerdown', () => {
+        btn.clear();
+        btn.fillStyle(color, 0.7);
+        btn.fillCircle(x, y, 40);
+        btn.lineStyle(2, color, 1);
+        btn.strokeCircle(x, y, 40);
+        callbackDown();
+      });
+      const resetBtn = () => {
+        btn.clear();
+        btn.fillStyle(color, 0.4);
+        btn.fillCircle(x, y, 40);
+        btn.lineStyle(2, color, 0.8);
+        btn.strokeCircle(x, y, 40);
+        callbackUp();
+      };
+      zone.on('pointerup', resetBtn);
+      zone.on('pointerout', resetBtn);
+    };
+
+    // Left side: Left/Right
+    drawButton(70, height - 70, 0x00e5ff, '<', () => this.isLeftDown = true, () => this.isLeftDown = false);
+    drawButton(170, height - 70, 0x00e5ff, '>', () => this.isRightDown = true, () => this.isRightDown = false);
+    
+    // Right side: Up/Down
+    drawButton(width - 70, height - 120, 0xffa500, '^', () => this.isUpDown = true, () => this.isUpDown = false);
+    drawButton(width - 70, height - 40, 0xffa500, 'v', () => this.isDownDown = true, () => this.isDownDown = false);
   }
 
   update(): void {
@@ -188,26 +250,45 @@ export class Level4Scene extends Phaser.Scene {
     });
 
     // Player Input Handling
-    if (this.cursors) {
-      const speed = 400;
-      let ax = 0;
-      let ay = 0;
-      
-      if (this.cursors.left.isDown) ax -= speed;
-      if (this.cursors.right.isDown) ax += speed;
-      if (this.cursors.up.isDown) ay -= speed;
-      if (this.cursors.down.isDown) ay += speed;
+    const controlType = this.registry.get('controlType') || 'keyboard';
+    const speed = 400;
+    let ax = 0;
+    let ay = 0;
 
-      this.probe.setAcceleration(ax, ay);
-      
-      // Rotate probe based on movement
-      if (ax !== 0 || ay !== 0) {
-        const targetAngle = Math.atan2(ay, ax) + Math.PI/2;
-        // Simple instant rotation for arcade feel
-        this.probe.setRotation(targetAngle);
+    if (controlType === 'pointer') {
+      const pointer = this.input.activePointer;
+      if (pointer.isDown) {
+        const angle = Phaser.Math.Angle.Between(this.probe.x, this.probe.y, pointer.x, pointer.y);
+        ax = Math.cos(angle) * speed;
+        ay = Math.sin(angle) * speed;
       }
+    } else {
+      let moveLeft = this.isLeftDown;
+      let moveRight = this.isRightDown;
+      let moveUp = this.isUpDown;
+      let moveDown = this.isDownDown;
+
+      if (this.cursors) {
+        if (this.cursors.left.isDown) moveLeft = true;
+        if (this.cursors.right.isDown) moveRight = true;
+        if (this.cursors.up.isDown) moveUp = true;
+        if (this.cursors.down.isDown) moveDown = true;
+      }
+
+      if (moveLeft) ax -= speed;
+      if (moveRight) ax += speed;
+      if (moveUp) ay -= speed;
+      if (moveDown) ay += speed;
     }
 
+    this.probe.setAcceleration(ax, ay);
+      
+    // Rotate probe based on movement
+    if (ax !== 0 || ay !== 0) {
+      const targetAngle = Math.atan2(ay, ax) + Math.PI/2;
+      // Simple instant rotation for arcade feel
+      this.probe.setRotation(targetAngle);
+    }
     // Collision checking: If probe is too far from the wormhole center
     // The "safe zone" is relative to where the center is.
     const dx = this.probe.x - this.wormholeCenter.x;
