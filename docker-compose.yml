@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  videojuego-peable:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: videojuego-peable:latest
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    container_name: videojuego-peable
