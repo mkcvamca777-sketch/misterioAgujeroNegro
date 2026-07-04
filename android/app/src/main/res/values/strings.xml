@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">misterioAgujeroNegro</string>
+    <string name="title_activity_main">misterioAgujeroNegro</string>
+    <string name="package_name">com.peable.misterio</string>
+    <string name="custom_url_scheme">com.peable.misterio</string>
+</resources>
