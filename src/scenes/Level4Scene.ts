@@ -13,14 +13,14 @@ export class Level4Scene extends Phaser.Scene {
   private probe!: Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 
-  private tunnelRings: Phaser.GameObjects.Ellipse[] = [];
-  private wormholeCenter = { x: 512, y: 300 };
-  private targetCenter = { x: 512, y: 300 };
+  private anomalies!: Phaser.Physics.Arcade.Group;
+  private speedLines: Phaser.GameObjects.Rectangle[] = [];
   
   private timeSurvived = 0;
   private survivalTimer!: Phaser.Time.TimerEvent;
+  private spawnTimer!: Phaser.Time.TimerEvent;
   private timeText!: Phaser.GameObjects.Text;
-  private goalTime = 20;
+  private goalTime = 10; // 10 seconds survival
 
   private activeQuestion: Question | null = null;
   private quizActive = false;
@@ -29,8 +29,6 @@ export class Level4Scene extends Phaser.Scene {
 
   private isLeftDown = false;
   private isRightDown = false;
-  private isUpDown = false;
-  private isDownDown = false;
 
   private quizQuestions: Question[] = [
     {
@@ -60,7 +58,6 @@ export class Level4Scene extends Phaser.Scene {
   }
 
   create(): void {
-    // Play deep hum for black hole
     AudioService.playBlackHoleHum();
     this.events.once('shutdown', () => {
       AudioService.stopBlackHoleHum();
@@ -76,23 +73,26 @@ export class Level4Scene extends Phaser.Scene {
     bg.fillStyle(0x130026, 1);
     bg.fillRect(0, 0, width, height);
 
-    // Create Wormhole Tunnel Rings
-    for (let i = 0; i < 15; i++) {
-      const ring = this.add.ellipse(width / 2, height / 2, 10, 10);
-      ring.setStrokeStyle(4, 0x00e5ff, 0.5);
-      // Give them staggered scales to form a tunnel
-      ring.scaleX = i * 1.5;
-      ring.scaleY = i * 1.5;
-      this.tunnelRings.push(ring);
+    // Speed lines for illusion of moving forward fast
+    for (let i = 0; i < 20; i++) {
+      const line = this.add.rectangle(
+        Phaser.Math.Between(0, width),
+        Phaser.Math.Between(0, height),
+        2,
+        Phaser.Math.Between(20, 100),
+        0x00e5ff,
+        0.5
+      );
+      this.speedLines.push(line);
     }
 
     // UI
-    this.add.text(20, height - 40, 'Controles: Usa las flechas para mantener la sonda cerca del centro del túnel.', {
+    this.add.text(20, height - 40, 'Esquiva las anomalías rojas. ¡Solo izquierda y derecha!', {
       font: '14px "Outfit", "Inter", sans-serif',
       color: '#b3e5fc'
     });
 
-    this.timeText = this.add.text(20, 20, `Estabilización: ${this.goalTime}s`, {
+    this.timeText = this.add.text(20, 20, `Viaje: ${this.goalTime}s restantes`, {
       font: 'bold 24px "Outfit", "Inter", sans-serif',
       color: '#ffffff'
     });
@@ -104,27 +104,25 @@ export class Level4Scene extends Phaser.Scene {
       padding: { x: 10, y: 5 }
     }).setOrigin(1, 0).setInteractive({ useHandCursor: true });
 
-    exitBtn.on('pointerover', () => exitBtn.setColor('#ffffff'));
-    exitBtn.on('pointerout', () => exitBtn.setColor('#ff5555'));
     exitBtn.on('pointerdown', () => {
       AudioService.playSFX('click');
-      this.cameras.main.fadeOut(400, 10, 5, 27);
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start('MainMenuScene');
-      });
+      this.scene.start('MainMenuScene');
     });
 
     // Probe
-    this.probe = this.physics.add.image(width / 2, height / 2, 'player_probe');
+    this.probe = this.physics.add.image(width / 2, height - 100, 'player_probe');
     this.probe.setCollideWorldBounds(true);
     this.probe.setDamping(true);
-    this.probe.setDrag(0.9);
-    this.probe.setMaxVelocity(400);
+    this.probe.setDrag(0.9); // high drag for snappy stops
+    this.probe.setMaxVelocity(500);
+
+    // Anomalies group
+    this.anomalies = this.physics.add.group();
+
+    this.physics.add.overlap(this.probe, this.anomalies, this.handleHitAnomaly, undefined, this);
 
     if (this.input.keyboard) {
       this.cursors = this.input.keyboard.createCursorKeys();
-      
-      // Cheat code / Shortcut to pass the level instantly
       const pKey = this.input.keyboard.addKey('P');
       pKey.on('down', () => {
         if (!this.quizActive) {
@@ -143,22 +141,57 @@ export class Level4Scene extends Phaser.Scene {
           this.timeSurvived++;
           const remaining = this.goalTime - this.timeSurvived;
           if (remaining > 0) {
-            this.timeText.setText(`Estabilización: ${remaining}s`);
-            
-            // Randomly shift target center every second
-            this.targetCenter.x = (width / 2) + Phaser.Math.Between(-300, 300);
-            this.targetCenter.y = (height / 2) + Phaser.Math.Between(-200, 200);
-
+            this.timeText.setText(`Viaje: ${remaining}s restantes`);
+            // Trigger quiz at half time
+            if (remaining === Math.floor(this.goalTime / 2) && this.currentQuestionIndex === 0) {
+              this.startQuiz();
+            }
           } else {
             this.timeText.setText('¡Túnel atravesado!');
-            this.startQuiz();
+            if (this.currentQuestionIndex === 1) {
+              this.startQuiz();
+            } else {
+              this.completeLevel();
+            }
           }
+        }
+      }
+    });
+
+    // Spawn anomalies
+    this.spawnTimer = this.time.addEvent({
+      delay: 800,
+      loop: true,
+      callback: () => {
+        if (!this.quizActive) {
+          this.spawnAnomaly();
         }
       }
     });
 
     this.createDialogPanel();
     this.createMobileControls();
+  }
+
+  private spawnAnomaly() {
+    const width = this.cameras.main.width;
+    const x = Phaser.Math.Between(50, width - 50);
+    
+    // Create a red circle graphic as texture
+    const graphics = this.add.graphics();
+    graphics.fillStyle(0xff1744, 0.8);
+    graphics.fillCircle(20, 20, 20);
+    graphics.generateTexture('anomaly_tex', 40, 40);
+    graphics.destroy();
+
+    const anomaly = this.anomalies.create(x, -50, 'anomaly_tex') as Phaser.Physics.Arcade.Image;
+    anomaly.setCircle(20);
+    anomaly.setVelocityY(Phaser.Math.Between(300, 500));
+    
+    // Destroy if out of bounds
+    this.time.delayedCall(4000, () => {
+      if (anomaly.active) anomaly.destroy();
+    });
   }
 
   private createMobileControls(): void {
@@ -179,9 +212,7 @@ export class Level4Scene extends Phaser.Scene {
       controls.add(btn);
 
       const label = this.add.text(x, y, text, {
-        fontSize: '24px',
-        color: '#ffffff',
-        fontStyle: 'bold'
+        fontSize: '24px', color: '#ffffff', fontStyle: 'bold'
       }).setOrigin(0.5);
       controls.add(label);
 
@@ -208,13 +239,9 @@ export class Level4Scene extends Phaser.Scene {
       zone.on('pointerout', resetBtn);
     };
 
-    // Left side: Left/Right
-    drawButton(70, height - 70, 0x00e5ff, '<', () => this.isLeftDown = true, () => this.isLeftDown = false);
-    drawButton(170, height - 70, 0x00e5ff, '>', () => this.isRightDown = true, () => this.isRightDown = false);
-    
-    // Right side: Up/Down
-    drawButton(width - 70, height - 120, 0xffa500, '^', () => this.isUpDown = true, () => this.isUpDown = false);
-    drawButton(width - 70, height - 40, 0xffa500, 'v', () => this.isDownDown = true, () => this.isDownDown = false);
+    // Left and Right only
+    drawButton(80, height - 80, 0x00e5ff, '<', () => this.isLeftDown = true, () => this.isLeftDown = false);
+    drawButton(width - 80, height - 80, 0x00e5ff, '>', () => this.isRightDown = true, () => this.isRightDown = false);
   }
 
   update(): void {
@@ -223,99 +250,79 @@ export class Level4Scene extends Phaser.Scene {
       return;
     }
 
-    // Move wormhole center smoothly towards target
-    this.wormholeCenter.x += (this.targetCenter.x - this.wormholeCenter.x) * 0.02;
-    this.wormholeCenter.y += (this.targetCenter.y - this.wormholeCenter.y) * 0.02;
+    const height = this.cameras.main.height;
 
-    // Update rings for 3D illusion
-    this.tunnelRings.forEach((ring, index) => {
-      // Expand rings outward
-      ring.scaleX += 0.05;
-      ring.scaleY += 0.05;
-      
-      // Update color based on scale
-      ring.setStrokeStyle(4 + ring.scaleX * 0.5, 0x00e5ff, Math.max(0, 1 - (ring.scaleX / 30)));
-
-      // Position them based on depth and center
-      // Inner rings are closer to the wormhole center, outer rings to the screen center
-      const depthFactor = 1 - (ring.scaleX / 30); // 1 = deep, 0 = screen
-      ring.x = 512 + (this.wormholeCenter.x - 512) * Math.max(0, depthFactor);
-      ring.y = 288 + (this.wormholeCenter.y - 288) * Math.max(0, depthFactor);
-
-      // If a ring gets too big, recycle it to the center
-      if (ring.scaleX > 25) {
-        ring.scaleX = 0.1;
-        ring.scaleY = 0.1;
+    // Animate speed lines
+    this.speedLines.forEach(line => {
+      line.y += 15;
+      if (line.y > height + 50) {
+        line.y = -50;
+        line.x = Phaser.Math.Between(0, this.cameras.main.width);
       }
     });
 
-    // Player Input Handling
+    // Enforce Y position
+    this.probe.y = height - 100;
+    this.probe.setVelocityY(0);
+
+    // Player Input Handling (Left/Right only)
     const controlType = this.registry.get('controlType') || 'keyboard';
-    const speed = 400;
+    const speed = 1000;
     let ax = 0;
-    let ay = 0;
 
     if (controlType === 'pointer') {
       const pointer = this.input.activePointer;
       if (pointer.isDown) {
-        const angle = Phaser.Math.Angle.Between(this.probe.x, this.probe.y, pointer.x, pointer.y);
-        ax = Math.cos(angle) * speed;
-        ay = Math.sin(angle) * speed;
+        // Move towards pointer X
+        const diff = pointer.x - this.probe.x;
+        if (Math.abs(diff) > 10) {
+          ax = Math.sign(diff) * speed;
+        }
       }
     } else {
       let moveLeft = this.isLeftDown;
       let moveRight = this.isRightDown;
-      let moveUp = this.isUpDown;
-      let moveDown = this.isDownDown;
 
       if (this.cursors) {
         if (this.cursors.left.isDown) moveLeft = true;
         if (this.cursors.right.isDown) moveRight = true;
-        if (this.cursors.up.isDown) moveUp = true;
-        if (this.cursors.down.isDown) moveDown = true;
       }
 
       if (moveLeft) ax -= speed;
       if (moveRight) ax += speed;
-      if (moveUp) ay -= speed;
-      if (moveDown) ay += speed;
     }
 
-    this.probe.setAcceleration(ax, ay);
+    this.probe.setAccelerationX(ax);
       
-    // Rotate probe based on movement
-    if (ax !== 0 || ay !== 0) {
-      const targetAngle = Math.atan2(ay, ax) + Math.PI/2;
-      // Simple instant rotation for arcade feel
-      this.probe.setRotation(targetAngle);
-    }
-    // Collision checking: If probe is too far from the wormhole center
-    // The "safe zone" is relative to where the center is.
-    const dx = this.probe.x - this.wormholeCenter.x;
-    const dy = this.probe.y - this.wormholeCenter.y;
-    const distanceToCenter = Math.sqrt(dx * dx + dy * dy);
-
-    if (distanceToCenter > 200) {
-      this.handleHitWall();
+    // Tilt probe based on movement
+    if (ax !== 0) {
+      const tilt = Math.sign(ax) * 0.2;
+      this.probe.setRotation(tilt);
+    } else {
+      this.probe.setRotation(0);
     }
   }
 
-  private handleHitWall(): void {
+  private handleHitAnomaly(_probeObj: any, anomalyObj: any): void {
     AudioService.playSFX('incorrect');
     this.cameras.main.flash(400, 255, 0, 0);
-    this.resetLevel();
+    anomalyObj.destroy();
+    
+    // Penalize time by 2 seconds
+    this.timeSurvived = Math.max(0, this.timeSurvived - 2);
+    const remaining = this.goalTime - this.timeSurvived;
+    this.timeText.setText(`Viaje: ${remaining}s restantes`);
   }
 
   private resetLevel(): void {
-    this.probe.setPosition(this.cameras.main.width / 2, this.cameras.main.height / 2);
+    this.probe.setPosition(this.cameras.main.width / 2, this.cameras.main.height - 100);
     this.probe.setVelocity(0);
     this.probe.setAcceleration(0, 0);
     
-    this.wormholeCenter = { x: 512, y: 300 };
-    this.targetCenter = { x: 512, y: 300 };
+    this.anomalies.clear(true, true);
 
     this.timeSurvived = 0;
-    this.timeText.setText(`Estabilización: ${this.goalTime}s`);
+    this.timeText.setText(`Viaje: ${this.goalTime}s restantes`);
     this.quizActive = false;
   }
 
@@ -343,7 +350,6 @@ export class Level4Scene extends Phaser.Scene {
   private startQuiz(): void {
     this.quizActive = true;
     this.probe.setVelocity(0);
-    this.currentQuestionIndex = 0;
     this.showQuizQuestion(this.quizQuestions[this.currentQuestionIndex]);
   }
 
@@ -358,14 +364,9 @@ export class Level4Scene extends Phaser.Scene {
     }
 
     const qText = this.add.text(width / 2, height / 2 - 160, q.text, {
-      fontSize: '34px',
-      fontFamily: 'Outfit, sans-serif',
-      fontStyle: 'bold',
-      color: '#ffffff',
-      align: 'center',
-      wordWrap: { width: 660 }
+      fontSize: '34px', fontFamily: 'Outfit, sans-serif', fontStyle: 'bold', color: '#ffffff',
+      align: 'center', wordWrap: { width: 660 }
     }).setOrigin(0.5);
-    // Add subtle shadow to stand out more
     qText.setShadow(2, 2, '#000000', 4, true, true);
     this.dialogPanel.add(qText);
 
@@ -378,8 +379,7 @@ export class Level4Scene extends Phaser.Scene {
       this.dialogPanel.add(btnG);
 
       const btnT = this.add.text(width / 2 - 260, yPos, opt, {
-        font: '16px "Outfit", sans-serif',
-        color: '#ffc107'
+        font: '16px "Outfit", sans-serif', color: '#ffc107'
       }).setOrigin(0, 0.5);
       this.dialogPanel.add(btnT);
 
@@ -387,15 +387,11 @@ export class Level4Scene extends Phaser.Scene {
       this.dialogPanel.add(btnZone);
 
       btnZone.on('pointerover', () => {
-        btnG.clear();
-        btnG.fillStyle(0x3e2c7a, 1);
-        btnG.fillRoundedRect(width / 2 - 280, yPos - 22, 560, 44, 8);
+        btnG.clear(); btnG.fillStyle(0x3e2c7a, 1); btnG.fillRoundedRect(width / 2 - 280, yPos - 22, 560, 44, 8);
       });
 
       btnZone.on('pointerout', () => {
-        btnG.clear();
-        btnG.fillStyle(0x281c4e, 1);
-        btnG.fillRoundedRect(width / 2 - 280, yPos - 22, 560, 44, 8);
+        btnG.clear(); btnG.fillStyle(0x281c4e, 1); btnG.fillRoundedRect(width / 2 - 280, yPos - 22, 560, 44, 8);
       });
 
       btnZone.on('pointerdown', () => {
@@ -420,17 +416,12 @@ export class Level4Scene extends Phaser.Scene {
     }
 
     const feedbackText = this.add.text(width / 2, height / 2 - 60, isCorrect ? '¡RESPUESTA CORRECTA!' : 'RESPUESTA INCORRECTA', {
-      font: 'bold 28px "Outfit", sans-serif',
-      color: isCorrect ? '#00e676' : '#ff1744',
-      align: 'center'
+      font: 'bold 28px "Outfit", sans-serif', color: isCorrect ? '#00e676' : '#ff1744', align: 'center'
     }).setOrigin(0.5);
     this.dialogPanel.add(feedbackText);
 
-    const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Incorrecto. La relatividad enseña que el agujero de gusano es un atajo espacio-temporal y que moverse a la velocidad de la luz ralentiza tu tiempo.', {
-      font: '18px "Outfit", sans-serif',
-      color: '#ffffff',
-      align: 'center',
-      wordWrap: { width: 600 }
+    const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Incorrecto. Es un puente teórico de espacio-tiempo. Inténtalo de nuevo.', {
+      font: '18px "Outfit", sans-serif', color: '#ffffff', align: 'center', wordWrap: { width: 600 }
     }).setOrigin(0.5);
     this.dialogPanel.add(explanationText);
 
@@ -440,8 +431,7 @@ export class Level4Scene extends Phaser.Scene {
     this.dialogPanel.add(btnContinue);
 
     const btnText = this.add.text(width / 2, height / 2 + 122, isCorrect ? 'CONTINUAR' : 'REINTENTAR', {
-      font: 'bold 16px "Outfit", sans-serif',
-      color: '#ffffff'
+      font: 'bold 16px "Outfit", sans-serif', color: '#ffffff'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
 
@@ -456,9 +446,9 @@ export class Level4Scene extends Phaser.Scene {
         this.resetLevel();
       } else {
         this.currentQuestionIndex++;
-        if (this.currentQuestionIndex < this.quizQuestions.length) {
-          this.showQuizQuestion(this.quizQuestions[this.currentQuestionIndex]);
-        } else {
+        this.quizActive = false;
+        
+        if (this.currentQuestionIndex >= this.quizQuestions.length) {
           this.completeLevel();
         }
       }
@@ -473,14 +463,11 @@ export class Level4Scene extends Phaser.Scene {
       this.dialogPanel.list[2].destroy();
     }
 
-    StorageService.setCurrentLevel(5); // Unlock next
-    StorageService.unlockBadge('viajero'); // Time traveler badge
+    StorageService.setCurrentLevel(5);
+    StorageService.unlockBadge('viajero');
     AudioService.playSFX('achievement');
 
-    // Final Certificate Image
     const certImg = this.add.image(width / 2, height / 2 - 20, 'certificado_nivel4');
-    
-    // Scale it to fit within the 700x400 modal
     const scale = Math.min(550 / certImg.width, 260 / certImg.height);
     certImg.setScale(scale);
     this.dialogPanel.add(certImg);
@@ -491,8 +478,7 @@ export class Level4Scene extends Phaser.Scene {
     this.dialogPanel.add(btnMenu);
 
     const btnText = this.add.text(width / 2, height / 2 + 154, 'VOLVER AL MENÚ', {
-      font: 'bold 16px "Outfit", sans-serif',
-      color: '#130d2d'
+      font: 'bold 16px "Outfit", sans-serif', color: '#130d2d'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
 
@@ -502,10 +488,7 @@ export class Level4Scene extends Phaser.Scene {
     menuZone.on('pointerdown', () => {
       AudioService.playSFX('click');
       this.dialogPanel.setVisible(false);
-      this.cameras.main.fadeOut(400, 10, 5, 27);
-      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-        this.scene.start('MainMenuScene');
-      });
+      this.scene.start('MainMenuScene');
     });
 
     this.dialogPanel.setVisible(true);
