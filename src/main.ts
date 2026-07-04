@@ -14,8 +14,8 @@ import { CreditsScene } from './scenes/CreditsScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: window.innerWidth,
-  height: window.innerHeight,
+  width: 1280,
+  height: 576,
   parent: 'game-container',
   backgroundColor: '#0a051b',
   physics: {
@@ -26,7 +26,7 @@ const config: Phaser.Types.Core.GameConfig = {
     }
   },
   scale: {
-    mode: Phaser.Scale.RESIZE,
+    mode: Phaser.Scale.ENVELOP,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   scene: [
