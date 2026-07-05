@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.peable.misterio',
-  appName: 'misterioAgujeroNegro',
+  appName: 'El misteriodel agujero negro',
   webDir: 'dist'
 };
 
