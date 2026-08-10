@@ -7,7 +7,8 @@ export class BadgesScene extends Phaser.Scene {
     { id: 'cazador', name: 'Cazador de Agujeros', desc: 'Completaste el Nivel 1.', iconColor: 0x00e5ff },
     { id: 'navegante', name: 'Navegante Experto', desc: 'Sobreviviste al Nivel 2.', iconColor: 0xffaa00 },
     { id: 'astronomo', name: 'Astrónomo Mayor', desc: 'Completaste el Nivel 3.', iconColor: 0x00e676 },
-    { id: 'viajero', name: 'Viajero del Tiempo', desc: 'Superaste el Nivel 4.', iconColor: 0xe040fb }
+    { id: 'viajero', name: 'Viajero del Tiempo', desc: 'Superaste el Nivel 4.', iconColor: 0xe040fb },
+    { id: 'agujero_negro', name: 'Investigador Agujeros', desc: 'Completaste el Nivel 5.', iconColor: 0xff3d00 }
   ];
 
   constructor() {
@@ -45,49 +46,53 @@ export class BadgesScene extends Phaser.Scene {
     
     // No default unlock needed anymore
 
-    // Draw badges in a 2x2 grid
+    // Draw badges in a 3-column layout, centering the second row
     this.badgeList.forEach((badge, idx) => {
-      const col = idx % 2;
-      const row = Math.floor(idx / 2);
+      const col = idx % 3;
+      const row = Math.floor(idx / 3);
 
-      const x = width / 2 - 200 + (col * 400);
-      const y = height / 2 - 80 + (row * 170);
+      // Calculate x, centering the second row which has only 2 items
+      let x = width / 2 - 270 + (col * 270);
+      if (row === 1) {
+        x = width / 2 - 135 + (col * 270);
+      }
+      const y = height / 2 - 80 + (row * 135);
 
       const isUnlocked = unlockedBadges.includes(badge.id);
 
-      // Draw card
+      // Draw card (width: 250, height: 110)
       const card = this.add.graphics();
       card.fillStyle(isUnlocked ? 0x221743 : 0x1b172b, 0.9);
       card.lineStyle(2, isUnlocked ? badge.iconColor : 0x555555, 1);
-      card.fillRoundedRect(x - 180, y - 60, 360, 120, 12);
-      card.strokeRoundedRect(x - 180, y - 60, 360, 120, 12);
+      card.fillRoundedRect(x - 125, y - 55, 250, 110, 12);
+      card.strokeRoundedRect(x - 125, y - 55, 250, 110, 12);
 
-      // Icon circle
+      // Icon circle (radius: 32)
       const iconBg = this.add.graphics();
       iconBg.fillStyle(isUnlocked ? badge.iconColor : 0x444444, 1);
-      iconBg.fillCircle(x - 110, y, 40);
+      iconBg.fillCircle(x - 75, y, 32);
 
       // Simple Star inside icon
-      const star = this.add.text(x - 110, y, isUnlocked ? '★' : '?', {
-        font: 'bold 36px "Outfit", sans-serif',
+      const star = this.add.text(x - 75, y, isUnlocked ? '★' : '?', {
+        font: 'bold 28px "Outfit", sans-serif',
         color: '#ffffff'
       }).setOrigin(0.5);
 
       // Text names
-      this.add.text(x - 50, y - 35, badge.name, {
-        font: 'bold 20px "Outfit", "Inter", sans-serif',
+      this.add.text(x - 30, y - 35, badge.name, {
+        font: 'bold 16px "Outfit", "Inter", sans-serif',
         color: isUnlocked ? '#ffffff' : '#888888'
       });
 
-      this.add.text(x - 50, y - 5, badge.desc, {
-        font: '14px "Outfit", "Inter", sans-serif',
+      this.add.text(x - 30, y - 8, badge.desc, {
+        font: '13px "Outfit", "Inter", sans-serif',
         color: isUnlocked ? '#b0bec5' : '#666666',
-        wordWrap: { width: 210 }
+        wordWrap: { width: 145 }
       });
 
       // Simple hover effect
       if (isUnlocked) {
-        const cardZone = this.add.zone(x, y, 360, 120).setInteractive({ useHandCursor: true });
+        const cardZone = this.add.zone(x, y, 250, 110).setInteractive({ useHandCursor: true });
         cardZone.on('pointerover', () => {
           this.tweens.add({
             targets: [star],

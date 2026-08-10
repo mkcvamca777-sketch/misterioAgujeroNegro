@@ -160,13 +160,6 @@ export class GameScene extends Phaser.Scene {
     });
 
     // Player Probe Physics Image
-    // Let's draw a simple triangular probe using Phaser graphics to load as a texture
-    const probeGraphics = this.make.graphics();
-    probeGraphics.fillStyle(0x00e5ff, 1);
-    probeGraphics.fillTriangle(0, 30, 15, 0, 30, 30);
-    probeGraphics.fillStyle(0xffa500, 1);
-    probeGraphics.fillRect(10, 25, 10, 8); // thruster fire
-    probeGraphics.generateTexture('player_probe', 30, 35);
 
     this.probe = this.physics.add.image(150, 150, 'player_probe');
     this.probe.setCollideWorldBounds(true);
@@ -185,12 +178,6 @@ export class GameScene extends Phaser.Scene {
     ];
 
     // Create orb graphics and load
-    const orbGraphics = this.make.graphics();
-    orbGraphics.fillStyle(0xffff00, 1);
-    orbGraphics.fillCircle(10, 10, 8);
-    orbGraphics.fillStyle(0xffffff, 0.6);
-    orbGraphics.fillCircle(8, 8, 4);
-    orbGraphics.generateTexture('data_orb', 20, 20);
 
     orbCoords.forEach((coord) => {
       const orb = this.orbs.create(coord.x, coord.y, 'data_orb') as Phaser.Physics.Arcade.Image;
@@ -412,7 +399,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     const qText = this.add.text(width / 2, height / 2 - 160, q.text, {
-      fontSize: '34px',
+      fontSize: '36px',
       fontFamily: 'Outfit, sans-serif',
       fontStyle: 'bold',
       color: '#ffffff',
@@ -434,7 +421,9 @@ export class GameScene extends Phaser.Scene {
       this.dialogPanel.add(btnG);
 
       const btnT = this.add.text(width / 2 - 260, yPos, opt, {
-        font: '16px "Outfit", sans-serif',
+        fontSize: '17px',
+        fontFamily: 'Outfit, sans-serif',
+        fontStyle: 'bold',
         color: '#ffc107'
       }).setOrigin(0, 0.5);
       this.dialogPanel.add(btnT);
@@ -480,14 +469,14 @@ export class GameScene extends Phaser.Scene {
 
     // Display Feedback Text
     const feedbackText = this.add.text(width / 2, height / 2 - 60, isCorrect ? '¡RESPUESTA CORRECTA!' : 'RESPUESTA INCORRECTA', {
-      font: 'bold 28px "Outfit", sans-serif',
+      font: 'bold 32px "Outfit", sans-serif',
       color: isCorrect ? '#00e676' : '#ff1744',
       align: 'center'
     }).setOrigin(0.5);
     this.dialogPanel.add(feedbackText);
 
     const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Vuelve a recolectar esta sonda y pon atención. El Horizonte de sucesos es el límite de escape, la supernova inicia la formación, y la singularidad es el centro infinitamente denso.', {
-      font: '18px "Outfit", sans-serif',
+      font: '20px "Outfit", sans-serif',
       color: '#ffffff',
       align: 'center',
       wordWrap: { width: 600 }
@@ -501,7 +490,7 @@ export class GameScene extends Phaser.Scene {
     this.dialogPanel.add(btnContinue);
 
     const btnText = this.add.text(width / 2, height / 2 + 122, isCorrect ? 'CONTINUAR' : 'REINTENTAR', {
-      font: 'bold 16px "Outfit", sans-serif',
+      font: 'bold 18px "Outfit", sans-serif',
       color: '#ffffff'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);

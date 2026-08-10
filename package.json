@@ -2,16 +2,42 @@
   "name": "videojuegopeable",
   "private": true,
   "version": "0.0.0",
-  "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop:start": "electron .",
+    "desktop:build": "npm run build && node electron/pack.cjs",
+    "desktop:dist": "npm run build && node electron/pack.cjs"
+  },
+  "build": {
+    "appId": "com.peable.misterio",
+    "productName": "El Misterio del Agujero Negro",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "nsis": {
+      "differentialPackage": false
+    }
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.2.1",
     "@types/howler": "^2.2.13",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "electron-packager": "^17.1.2",
     "typescript": "~6.0.2",
     "vite": "^5.4.21"
   },

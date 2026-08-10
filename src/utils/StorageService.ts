@@ -63,6 +63,17 @@ export class StorageService {
     return this.load().currentLevel;
   }
 
+  public static getTargetScene(): string {
+    const current = this.getCurrentLevel();
+    switch (current) {
+      case 2: return 'Level2Scene';
+      case 3: return 'Level3Scene';
+      case 4: return 'Level4Scene';
+      case 5: return 'Level5Scene';
+      default: return 'GameScene';
+    }
+  }
+
   public static setCurrentLevel(level: number): void {
     const p = this.load();
     p.currentLevel = level;

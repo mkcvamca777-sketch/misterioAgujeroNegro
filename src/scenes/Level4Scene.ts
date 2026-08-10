@@ -32,24 +32,24 @@ export class Level4Scene extends Phaser.Scene {
 
   private quizQuestions: Question[] = [
     {
-      text: '¿Qué es teóricamente un agujero de gusano?',
+      text: 'Que es teoricamente un agujero de gusano?',
       options: [
-        'A) Un atajo a través del espacio-tiempo.',
+        'A) Un atajo a traves del espacio-tiempo.',
         'B) Un tipo especial de estrella fugaz.',
         'C) El centro absoluto del universo.'
       ],
       correct: 0,
-      explanation: '¡Correcto! Según la Relatividad General de Einstein, es un puente de Einstein-Rosen que conecta dos puntos distantes del espacio-tiempo.'
+      explanation: 'Correcto. Segun la Relatividad General, seria un puente de Einstein-Rosen que conecta dos puntos distantes del espacio-tiempo.'
     },
     {
-      text: 'Si viajas cerca de la velocidad de la luz, ¿qué le ocurre al tiempo para ti en comparación con la Tierra?',
+      text: 'Si viajas cerca de la velocidad de la luz, que le ocurre al tiempo para ti en comparacion con la Tierra?',
       options: [
-        'A) El tiempo pasa más rápido.',
-        'B) El tiempo pasa más lento.',
+        'A) El tiempo pasa mas rapido.',
+        'B) El tiempo pasa mas lento.',
         'C) El tiempo se detiene por completo.'
       ],
       correct: 1,
-      explanation: '¡Excelente! Esto se conoce como dilatación temporal. Para ti, el tiempo pasa más lento que para los observadores estacionarios.'
+      explanation: 'Excelente. Esto se conoce como dilatacion temporal. Para ti, el tiempo pasa mas lento que para observadores estacionarios.'
     }
   ];
 
@@ -87,7 +87,7 @@ export class Level4Scene extends Phaser.Scene {
     }
 
     // UI
-    this.add.text(20, height - 40, 'Esquiva las anomalías rojas. ¡Solo izquierda y derecha!', {
+    this.add.text(20, height - 40, 'Esquiva las anomalias rojas. Solo izquierda y derecha.', {
       font: '14px "Outfit", "Inter", sans-serif',
       color: '#b3e5fc'
     });
@@ -97,7 +97,7 @@ export class Level4Scene extends Phaser.Scene {
       color: '#ffffff'
     });
 
-    const exitBtn = this.add.text(width - 20, 20, '✖ SALIR', {
+    const exitBtn = this.add.text(width - 20, 20, 'SALIR', {
       font: 'bold 16px "Outfit", "Inter", sans-serif',
       color: '#ff5555',
       backgroundColor: '#220000',
@@ -126,7 +126,7 @@ export class Level4Scene extends Phaser.Scene {
       const pKey = this.input.keyboard.addKey('P');
       pKey.on('down', () => {
         if (!this.quizActive) {
-          this.timeText.setText('¡Túnel saltado!');
+          this.timeText.setText('Tunel saltado.');
           this.completeLevel();
         }
       });
@@ -147,7 +147,7 @@ export class Level4Scene extends Phaser.Scene {
               this.startQuiz();
             }
           } else {
-            this.timeText.setText('¡Túnel atravesado!');
+            this.timeText.setText('Tunel atravesado.');
             if (this.currentQuestionIndex === 1) {
               this.startQuiz();
             } else {
@@ -364,7 +364,7 @@ export class Level4Scene extends Phaser.Scene {
     }
 
     const qText = this.add.text(width / 2, height / 2 - 160, q.text, {
-      fontSize: '34px', fontFamily: 'Outfit, sans-serif', fontStyle: 'bold', color: '#ffffff',
+      fontSize: '36px', fontFamily: 'Outfit, sans-serif', fontStyle: 'bold', color: '#ffffff',
       align: 'center', wordWrap: { width: 660 }
     }).setOrigin(0.5);
     qText.setShadow(2, 2, '#000000', 4, true, true);
@@ -379,7 +379,10 @@ export class Level4Scene extends Phaser.Scene {
       this.dialogPanel.add(btnG);
 
       const btnT = this.add.text(width / 2 - 260, yPos, opt, {
-        font: '16px "Outfit", sans-serif', color: '#ffc107'
+        fontSize: '17px',
+        fontFamily: 'Outfit, sans-serif',
+        fontStyle: 'bold',
+        color: '#ffc107'
       }).setOrigin(0, 0.5);
       this.dialogPanel.add(btnT);
 
@@ -415,13 +418,13 @@ export class Level4Scene extends Phaser.Scene {
       this.dialogPanel.list[2].destroy();
     }
 
-    const feedbackText = this.add.text(width / 2, height / 2 - 60, isCorrect ? '¡RESPUESTA CORRECTA!' : 'RESPUESTA INCORRECTA', {
-      font: 'bold 28px "Outfit", sans-serif', color: isCorrect ? '#00e676' : '#ff1744', align: 'center'
+    const feedbackText = this.add.text(width / 2, height / 2 - 60, isCorrect ? 'RESPUESTA CORRECTA' : 'RESPUESTA INCORRECTA', {
+      font: 'bold 32px "Outfit", sans-serif', color: isCorrect ? '#00e676' : '#ff1744', align: 'center'
     }).setOrigin(0.5);
     this.dialogPanel.add(feedbackText);
 
-    const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Incorrecto. Es un puente teórico de espacio-tiempo. Inténtalo de nuevo.', {
-      font: '18px "Outfit", sans-serif', color: '#ffffff', align: 'center', wordWrap: { width: 600 }
+    const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Incorrecto. Es un puente teorico de espacio-tiempo. Intentalo de nuevo.', {
+      font: '20px "Outfit", sans-serif', color: '#ffffff', align: 'center', wordWrap: { width: 600 }
     }).setOrigin(0.5);
     this.dialogPanel.add(explanationText);
 
@@ -431,7 +434,7 @@ export class Level4Scene extends Phaser.Scene {
     this.dialogPanel.add(btnContinue);
 
     const btnText = this.add.text(width / 2, height / 2 + 122, isCorrect ? 'CONTINUAR' : 'REINTENTAR', {
-      font: 'bold 16px "Outfit", sans-serif', color: '#ffffff'
+      font: 'bold 18px "Outfit", sans-serif', color: '#ffffff'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
 
@@ -467,30 +470,47 @@ export class Level4Scene extends Phaser.Scene {
     StorageService.unlockBadge('viajero');
     AudioService.playSFX('achievement');
 
-    const certImg = this.add.image(width / 2, height / 2 - 20, 'certificado_nivel4');
-    const scale = Math.min(550 / certImg.width, 260 / certImg.height);
-    certImg.setScale(scale);
-    this.dialogPanel.add(certImg);
+    const winTitle = this.add.text(width / 2, height / 2 - 90, '¡NIVEL COMPLETADO!', {
+      fontSize: '36px',
+      fontFamily: 'Outfit, sans-serif',
+      fontStyle: 'bold',
+      color: '#ffc107',
+      align: 'center'
+    }).setOrigin(0.5);
+    this.dialogPanel.add(winTitle);
+
+    const winDesc = this.add.text(width / 2, height / 2 - 10, '¡Has atravesado el Agujero de Gusano con éxito!\n\nGanaste la insignia "Viajero del Tiempo".', {
+      fontSize: '20px',
+      fontFamily: 'Outfit, sans-serif',
+      color: '#ffffff',
+      align: 'center',
+      wordWrap: { width: 600 }
+    }).setOrigin(0.5);
+    this.dialogPanel.add(winDesc);
 
     const btnMenu = this.add.graphics();
     btnMenu.fillStyle(0x00e5ff, 1);
-    btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 130, 240, 48, 8);
+    btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 105, 240, 48, 8);
     this.dialogPanel.add(btnMenu);
 
-    const btnText = this.add.text(width / 2, height / 2 + 154, 'VOLVER AL MENÚ', {
-      font: 'bold 16px "Outfit", sans-serif', color: '#130d2d'
+    const btnText = this.add.text(width / 2, height / 2 + 129, 'IR AL NIVEL 5', {
+      fontSize: '18px',
+      fontFamily: 'Outfit, sans-serif',
+      fontStyle: 'bold',
+      color: '#130d2d'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
 
-    const menuZone = this.add.zone(width / 2, height / 2 + 154, 240, 48).setInteractive({ useHandCursor: true });
+    const menuZone = this.add.zone(width / 2, height / 2 + 129, 240, 48).setInteractive({ useHandCursor: true });
     this.dialogPanel.add(menuZone);
 
     menuZone.on('pointerdown', () => {
       AudioService.playSFX('click');
       this.dialogPanel.setVisible(false);
-      this.scene.start('MainMenuScene');
+      this.scene.start('Level5Scene');
     });
 
     this.dialogPanel.setVisible(true);
   }
 }
+

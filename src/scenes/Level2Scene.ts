@@ -395,7 +395,7 @@ export class Level2Scene extends Phaser.Scene {
     }
 
     const qText = this.add.text(width / 2, height / 2 - 160, q.text, {
-      fontSize: '34px',
+      fontSize: '36px',
       fontFamily: 'Outfit, sans-serif',
       fontStyle: 'bold',
       color: '#ffffff',
@@ -415,7 +415,9 @@ export class Level2Scene extends Phaser.Scene {
       this.dialogPanel.add(btnG);
 
       const btnT = this.add.text(width / 2 - 260, yPos, opt, {
-        font: '16px "Outfit", sans-serif',
+        fontSize: '17px',
+        fontFamily: 'Outfit, sans-serif',
+        fontStyle: 'bold',
         color: '#ffc107'
       }).setOrigin(0, 0.5);
       this.dialogPanel.add(btnT);
@@ -457,14 +459,14 @@ export class Level2Scene extends Phaser.Scene {
     }
 
     const feedbackText = this.add.text(width / 2, height / 2 - 60, isCorrect ? '¡RESPUESTA CORRECTA!' : 'RESPUESTA INCORRECTA', {
-      font: 'bold 28px "Outfit", sans-serif',
+      font: 'bold 32px "Outfit", sans-serif',
       color: isCorrect ? '#00e676' : '#ff1744',
       align: 'center'
     }).setOrigin(0.5);
     this.dialogPanel.add(feedbackText);
 
     const explanationText = this.add.text(width / 2, height / 2 + 10, isCorrect ? this.activeQuestion.explanation : 'Atención cadete: El Sol es una enana amarilla y al morir crecerá a Gigante Roja para luego colapsar a Enana Blanca.', {
-      font: '18px "Outfit", sans-serif',
+      font: '20px "Outfit", sans-serif',
       color: '#ffffff',
       align: 'center',
       wordWrap: { width: 600 }
@@ -477,7 +479,7 @@ export class Level2Scene extends Phaser.Scene {
     this.dialogPanel.add(btnContinue);
 
     const btnText = this.add.text(width / 2, height / 2 + 122, isCorrect ? 'CONTINUAR' : 'REINTENTAR', {
-      font: 'bold 16px "Outfit", sans-serif',
+      font: 'bold 18px "Outfit", sans-serif',
       color: '#ffffff'
     }).setOrigin(0.5);
     this.dialogPanel.add(btnText);
@@ -536,7 +538,7 @@ export class Level2Scene extends Phaser.Scene {
     btnMenu.fillRoundedRect(width / 2 - 120, height / 2 + 100, 240, 48, 8);
     this.dialogPanel.add(btnMenu);
 
-    const btnText = this.add.text(width / 2, height / 2 + 124, 'VOLVER AL MENÚ', {
+    const btnText = this.add.text(width / 2, height / 2 + 124, 'SIGUIENTE NIVEL', {
       font: 'bold 16px "Outfit", sans-serif',
       color: '#130d2d'
     }).setOrigin(0.5);

@@ -51,7 +51,7 @@ export class PreloadScene extends Phaser.Scene {
     const subtitleText = this.make.text({
       x: width / 2,
       y: height / 2 - 70,
-      text: 'Cargando aventura espacial con el Profesor Pibble...',
+      text: 'Cargando aventura espacial con Pibble...',
       style: {
         font: '20px "Outfit", "Inter", sans-serif',
         color: '#a092ff',
@@ -110,6 +110,38 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Generate common procedural textures here so they are available in all scenes globally
+    
+    // Generate common procedural textures here so they are available in all scenes globally
+    
+    if (!this.textures.exists('player_probe')) {
+      const probeGraphics = this.make.graphics({ x: 0, y: 0 });
+      // Draw a cool spaceship
+      probeGraphics.fillStyle(0xd0d0d0, 1);
+      // Main fuselage
+      probeGraphics.fillTriangle(20, 0, 40, 40, 0, 40);
+      // Wings
+      probeGraphics.fillStyle(0x00e5ff, 1);
+      probeGraphics.fillTriangle(20, 10, 50, 40, 30, 40);
+      probeGraphics.fillTriangle(20, 10, -10, 40, 10, 40);
+      // Engine thrust
+      probeGraphics.fillStyle(0xffaa00, 1);
+      probeGraphics.fillTriangle(15, 40, 25, 40, 20, 55);
+      
+      probeGraphics.generateTexture('player_probe', 40, 55);
+      probeGraphics.destroy();
+    }
+    // Collectible Data Orb
+    if (!this.textures.exists('data_orb')) {
+      const orbGraphics = this.make.graphics({ x: 0, y: 0 });
+      orbGraphics.fillStyle(0xffff00, 1);
+      orbGraphics.fillCircle(10, 10, 8);
+      orbGraphics.fillStyle(0xffffff, 0.6);
+      orbGraphics.fillCircle(8, 8, 4);
+      orbGraphics.generateTexture('data_orb', 20, 20);
+      orbGraphics.destroy();
+    }
+    
     // Initialize our audio helper
     AudioService.initialize();
     

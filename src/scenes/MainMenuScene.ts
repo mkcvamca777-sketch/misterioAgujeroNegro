@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { AudioService } from '../audio/AudioService';
+import { StorageService } from '../utils/StorageService';
 
 export class MainMenuScene extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Sprite[] = [];
@@ -19,14 +20,12 @@ export class MainMenuScene extends Phaser.Scene {
     // 1. Add background (Capa 1)
     const bg = this.add.image(width / 2, height / 2, 'menu_bg_new');
     bg.setOrigin(0.5, 0.5);
+    bg.setDisplaySize(width, height);
 
     // 2. Add dynamic interactive animations on the background elements
-    // Ensure we create textures first
-    this.createPibbleWandSparkles();
     this.createBlackHoleAnimation();
     this.createLanternFlicker();
     this.createObservatoryGlow();
-    this.createPibbleBlinking();
 
     // 3. Create Buttons (Capa 3)
     this.createCroppedButtons();
@@ -36,6 +35,14 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private createBlackHoleAnimation(): void {
+    // Ensure sparkle particle texture exists to prevent green wireframe placeholders
+    if (!this.textures.exists('sparkle_particle')) {
+      const g = this.make.graphics();
+      g.fillStyle(0xffffff, 1);
+      g.fillCircle(3, 3, 3);
+      g.generateTexture('sparkle_particle', 6, 6);
+    }
+
     // The black hole center is at X=833, Y=120
     const bhX = 833;
     const bhY = 120;
@@ -105,19 +112,8 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private createObservatoryGlow(): void {
-    // Observatory window is at X=86, Y=355
-    const windowGlow = this.add.polygon(
-      86, 355,
-      [
-        0, 0,
-        20, -10,
-        40, 0,
-        35, 30,
-        5, 30
-      ],
-      0xffa500,
-      0.15
-    );
+    // Observatory window glow using smooth circle instead of polygon
+    const windowGlow = this.add.circle(86, 355, 25, 0xffa500, 0.15);
     windowGlow.setBlendMode(Phaser.BlendModes.ADD);
 
     this.tweens.add({
@@ -179,6 +175,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   private createCroppedButtons(): void {
+    const width = this.cameras.main.width;
     const btnData = [
       { key: 'btn_comenzar', scene: 'GameScene', crop: { x: 152, y: 232, w: 728, h: 188 } },
       { key: 'btn_enciclopedia', scene: 'EncyclopediaScene', crop: { x: 120, y: 244, w: 784, h: 192 } },
@@ -193,12 +190,12 @@ export class MainMenuScene extends Phaser.Scene {
         texture.add('crop', 0, btn.crop.x, btn.crop.y, btn.crop.w, btn.crop.h);
       }
 
-      // Vertical layout in a 1024x576 canvas
-      const targetY = 365 + (index * 40);
-      const btnSprite = this.add.sprite(512, targetY, btn.key, 'crop');
+      // Vertical layout in a 1280x576 canvas
+      const targetY = 370 + (index * 37);
+      const btnSprite = this.add.sprite(width / 2, targetY, btn.key, 'crop');
       
       // Calculate uniform scale based on target width to preserve aspect ratio
-      const targetWidth = 170;
+      const targetWidth = 150;
       const baseScaleX = targetWidth / btnSprite.width;
       const baseScaleY = baseScaleX; // Uniform scaling
       btnSprite.setScale(baseScaleX, baseScaleY);
@@ -240,7 +237,8 @@ export class MainMenuScene extends Phaser.Scene {
           onComplete: () => {
             this.cameras.main.fadeOut(400, 10, 5, 27);
             this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
-              this.scene.start(btn.scene);
+              const targetScene = btn.key === 'btn_comenzar' ? StorageService.getTargetScene() : btn.scene;
+              this.scene.start(targetScene);
             });
           }
         });

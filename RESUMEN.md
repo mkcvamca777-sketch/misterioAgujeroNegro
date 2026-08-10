@@ -13,7 +13,9 @@ El juego está dividido en "Escenas", que son los diferentes archivos donde ocur
 - **`MainMenuScene.ts`**: El menú principal donde puedes elegir ir a la enciclopedia, ver tus medallas o iniciar los niveles.
 - **`GameScene.ts` (Nivel 1)**: Nivel del agujero negro. Destaca por el uso de Gravedad Atractiva (física).
 - **`Level2Scene.ts` (Nivel 2)**: Nivel de la enana roja. Destaca por la generación de asteroides y obstáculos móviles.
-- **`Level4Scene.ts` (Nivel 4)**: Nivel del agujero de gusano. Transformado en un veloz *Runner* vertical donde debes esquivar anomalías moviéndote solo de izquierda a derecha.
+- **`Level3Scene.ts` (Nivel 3)**: Nivel de la constelación. Destaca por el dibujo de líneas interactivo para trazar estrellas.
+- **`Level4Scene.ts` (Nivel 4)**: Nivel del agujero de gusano. Runner vertical donde esquivas anomalías.
+- **`Level5Scene.ts` (Nivel 5)**: Nivel del nacimiento del agujero negro. Destaca por el laboratorio gravitacional interactivo con controles de masa y gravedad.
 
 ## 3. Características Especiales
 
@@ -39,6 +41,7 @@ import { GameScene } from './scenes/GameScene';
 import { Level2Scene } from './scenes/Level2Scene';
 import { Level3Scene } from './scenes/Level3Scene';
 import { Level4Scene } from './scenes/Level4Scene';
+import { Level5Scene } from './scenes/Level5Scene';
 import { EncyclopediaScene } from './scenes/EncyclopediaScene';
 import { BadgesScene } from './scenes/BadgesScene';
 import { ConfigScene } from './scenes/ConfigScene';
@@ -46,7 +49,7 @@ import { CreditsScene } from './scenes/CreditsScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: 1024,
+  width: 1280,
   height: 576,
   parent: 'game-container',
   backgroundColor: '#0a051b',
@@ -58,13 +61,22 @@ const config: Phaser.Types.Core.GameConfig = {
     }
   },
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.ENVELOP,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   scene: [
-    BootScene, PreloadScene, MainMenuScene, GameScene, 
-    Level2Scene, Level3Scene, Level4Scene, EncyclopediaScene, 
-    BadgesScene, ConfigScene, CreditsScene
+    BootScene,
+    PreloadScene,
+    MainMenuScene,
+    GameScene,
+    Level2Scene,
+    Level3Scene,
+    Level4Scene,
+    Level5Scene,
+    EncyclopediaScene,
+    BadgesScene,
+    ConfigScene,
+    CreditsScene
   ]
 };
 
