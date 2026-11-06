@@ -12,6 +12,16 @@ import { EncyclopediaScene } from './scenes/EncyclopediaScene';
 import { BadgesScene } from './scenes/BadgesScene';
 import { ConfigScene } from './scenes/ConfigScene';
 import { CreditsScene } from './scenes/CreditsScene';
+import { PugGuideScene } from './scenes/PugGuideScene';
+import { PugLevel1Scene } from './scenes/PugLevel1Scene';
+import { PugLevel2Scene } from './scenes/PugLevel2Scene';
+import { PugLevel3Scene } from './scenes/PugLevel3Scene';
+import { PugLevel4Scene } from './scenes/PugLevel4Scene';
+import { PugLevel5Scene } from './scenes/PugLevel5Scene';
+import { PugEncyclopediaScene } from './scenes/PugEncyclopediaScene';
+import { PugBadgesScene } from './scenes/PugBadgesScene';
+import { PugSettingsScene } from './scenes/PugSettingsScene';
+import { PugCreditsScene } from './scenes/PugCreditsScene';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -42,7 +52,17 @@ const config: Phaser.Types.Core.GameConfig = {
     EncyclopediaScene,
     BadgesScene,
     ConfigScene,
-    CreditsScene
+    CreditsScene,
+    PugGuideScene,
+    PugLevel1Scene,
+    PugLevel2Scene,
+    PugLevel3Scene,
+    PugLevel4Scene,
+    PugLevel5Scene,
+    PugEncyclopediaScene,
+    PugBadgesScene,
+    PugSettingsScene,
+    PugCreditsScene
   ]
 };
 

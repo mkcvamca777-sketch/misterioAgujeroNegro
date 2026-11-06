@@ -97,6 +97,7 @@ export class PreloadScene extends Phaser.Scene {
     // Load static image assets
     this.load.image('menu_bg_new', 'assets/menu_bg_new.jpg');
     this.load.image('btn_comenzar', 'assets/btn_comenzar.png');
+    this.load.image('btn_versiones', 'assets/btn_versiones.png');
     this.load.image('btn_enciclopedia', 'assets/btn_enciclopedia.png');
     this.load.image('btn_insignias', 'assets/btn_insignias.png');
     this.load.image('btn_configuracion', 'assets/btn_configuracion.png');
@@ -107,6 +108,14 @@ export class PreloadScene extends Phaser.Scene {
     this.load.image('btn_reintentar', 'assets/btn_reintentar.png');
     this.load.image('btn_volver_menu', 'assets/btn_volver_menu.png');
     this.load.image('bg_game_over', 'assets/bg_game_over.png');
+    this.load.image('pug_menu_bg', 'assets/pug_menu_bg.png');
+    this.load.image('pug_btn_comenzar', 'assets/pug_btn_comenzar.png');
+    this.load.image('pug_btn_creditos', 'assets/pug_btn_creditos.png');
+    this.load.image('pug_btn_insignias', 'assets/pug_btn_insignias.png');
+    this.load.image('pug_btn_enciclopedia', 'assets/pug_btn_enciclopedia.png');
+    this.load.image('pug_btn_ajustes', 'assets/pug_btn_ajustes.png');
+    this.load.image('pug_guide', 'assets/pug_guide.png');
+    this.load.image('pug_game_over', 'assets/pug_game_over.png');
   }
 
   create(): void {

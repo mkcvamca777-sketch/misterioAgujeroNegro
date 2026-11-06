@@ -5,6 +5,8 @@ import { StorageService } from '../utils/StorageService';
 export class MainMenuScene extends Phaser.Scene {
   private buttons: Phaser.GameObjects.Sprite[] = [];
   private pibbleBlinkTimer!: Phaser.Time.TimerEvent;
+  private versionsPanel?: Phaser.GameObjects.Container;
+  private versionsButton?: Phaser.GameObjects.Sprite;
 
   constructor() {
     super('MainMenuScene');
@@ -29,6 +31,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     // 3. Create Buttons (Capa 3)
     this.createCroppedButtons();
+    this.createVersionsButton();
 
     // 4. Handle resize events to keep centering (responsive)
     this.scale.on('resize', this.resize, this);
@@ -243,6 +246,170 @@ export class MainMenuScene extends Phaser.Scene {
           }
         });
       });
+    });
+  }
+
+  private createVersionsButton(): void {
+    const width = this.cameras.main.width;
+    this.versionsButton = this.add.sprite(width / 2, 58, 'btn_versiones');
+    const baseScale = 190 / this.versionsButton.width;
+    this.versionsButton.setScale(baseScale);
+    this.versionsButton.setInteractive({ useHandCursor: true });
+
+    this.versionsButton.on('pointerover', () => {
+      AudioService.playSFX('click');
+      this.tweens.add({
+        targets: this.versionsButton,
+        scaleX: baseScale * 1.05,
+        scaleY: baseScale * 1.05,
+        duration: 120,
+        ease: 'Back.easeOut'
+      });
+    });
+
+    this.versionsButton.on('pointerout', () => {
+      this.tweens.add({
+        targets: this.versionsButton,
+        scaleX: baseScale,
+        scaleY: baseScale,
+        duration: 120,
+        ease: 'Sine.easeOut'
+      });
+    });
+
+    this.versionsButton.on('pointerdown', () => {
+      AudioService.playSFX('correct');
+      this.toggleVersionsPanel();
+    });
+  }
+
+  private toggleVersionsPanel(): void {
+    if (this.versionsPanel) {
+      this.tweens.add({
+        targets: this.versionsPanel,
+        alpha: 0,
+        y: 94,
+        duration: 160,
+        ease: 'Sine.easeIn',
+        onComplete: () => {
+          this.versionsPanel?.destroy();
+          this.versionsPanel = undefined;
+        }
+      });
+      return;
+    }
+
+    const width = this.cameras.main.width;
+    this.versionsPanel = this.add.container(width / 2, 94);
+    this.versionsPanel.setAlpha(0);
+
+    const panelBg = this.add.graphics();
+    panelBg.fillStyle(0x071a6a, 0.86);
+    panelBg.fillRoundedRect(-205, 0, 410, 188, 18);
+    panelBg.lineStyle(4, 0x27e8ff, 0.95);
+    panelBg.strokeRoundedRect(-205, 0, 410, 188, 18);
+    panelBg.lineStyle(2, 0xffffff, 0.35);
+    panelBg.strokeRoundedRect(-194, 10, 388, 168, 14);
+
+    const pugButton = this.createSpaceButton(0, 52, 300, 58, 'GUIA PUG', 22);
+    pugButton.setInteractive(
+      new Phaser.Geom.Rectangle(-150, -29, 300, 58),
+      Phaser.Geom.Rectangle.Contains
+    );
+    pugButton.on('pointerdown', () => {
+      AudioService.playSFX('correct');
+      this.cameras.main.fadeOut(250, 10, 5, 27);
+      this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+        this.scene.start('PugGuideScene');
+      });
+    });
+
+    const gamesButton = this.createSpaceButton(0, 123, 300, 58, 'OTROS JUEGOS', 22);
+    gamesButton.setInteractive(
+      new Phaser.Geom.Rectangle(-150, -29, 300, 58),
+      Phaser.Geom.Rectangle.Contains
+    );
+    gamesButton.on('pointerdown', () => this.showComingSoonMessage('Otros juegos'));
+
+    this.versionsPanel.add([panelBg, pugButton, gamesButton]);
+    this.tweens.add({
+      targets: this.versionsPanel,
+      alpha: 1,
+      y: 104,
+      duration: 180,
+      ease: 'Back.easeOut'
+    });
+  }
+
+  private createSpaceButton(
+    x: number,
+    y: number,
+    buttonWidth: number,
+    buttonHeight: number,
+    label: string,
+    fontSize: number
+  ): Phaser.GameObjects.Container {
+    const container = this.add.container(x, y);
+    const halfWidth = buttonWidth / 2;
+    const halfHeight = buttonHeight / 2;
+
+    const bg = this.add.graphics();
+    bg.fillStyle(0x0099ff, 1);
+    bg.fillRoundedRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, halfHeight);
+    bg.fillStyle(0x15dfff, 0.95);
+    bg.fillRoundedRect(-halfWidth + 8, -halfHeight + 8, buttonWidth - 16, 22, 14);
+    bg.fillStyle(0x0064ff, 0.9);
+    bg.fillRoundedRect(-halfWidth + 8, -4, buttonWidth - 16, halfHeight - 4, 14);
+    bg.lineStyle(5, 0x00279d, 1);
+    bg.strokeRoundedRect(-halfWidth, -halfHeight, buttonWidth, buttonHeight, halfHeight);
+    bg.lineStyle(2, 0x6dffff, 0.9);
+    bg.strokeRoundedRect(-halfWidth + 10, -halfHeight + 10, buttonWidth - 20, buttonHeight - 20, halfHeight - 8);
+
+    const icon = this.add.graphics();
+    icon.fillStyle(0xffd23a, 1);
+    icon.fillCircle(-halfWidth + 18, 0, 12);
+    icon.fillStyle(0x0099ff, 1);
+    icon.fillCircle(-halfWidth + 24, -4, 11);
+    icon.fillStyle(0xffffff, 0.95);
+    icon.fillCircle(-halfWidth + 12, -5, 2);
+    icon.fillCircle(-halfWidth + 16, 5, 1.5);
+
+    const title = this.add.text(12, 0, label, {
+      fontFamily: '"Outfit", "Inter", Arial, sans-serif',
+      fontSize: `${fontSize}px`,
+      fontStyle: '900',
+      color: '#ffffff',
+      stroke: '#06146f',
+      strokeThickness: 7
+    });
+    title.setOrigin(0.5);
+
+    container.add([bg, icon, title]);
+    return container;
+  }
+
+  private showComingSoonMessage(text: string): void {
+    AudioService.playSFX('correct');
+    const width = this.cameras.main.width;
+    const toast = this.add.text(width / 2, 318, `${text}\nPronto disponible`, {
+      fontFamily: '"Outfit", "Inter", Arial, sans-serif',
+      fontSize: '24px',
+      fontStyle: '800',
+      color: '#ffffff',
+      align: 'center',
+      stroke: '#06146f',
+      strokeThickness: 6
+    });
+    toast.setOrigin(0.5);
+    toast.setDepth(20);
+
+    this.tweens.add({
+      targets: toast,
+      y: 292,
+      alpha: 0,
+      duration: 1400,
+      ease: 'Sine.easeIn',
+      onComplete: () => toast.destroy()
     });
   }
 
